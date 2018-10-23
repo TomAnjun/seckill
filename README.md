@@ -15,5 +15,5 @@ protostuff
 6. the problems about concurrent
 7. reduce row-lock hold time and reduce connect database frequence
 8. create procedure to issue concurrent 
-9. js module format coding.
+9. js module format coding. 
 
