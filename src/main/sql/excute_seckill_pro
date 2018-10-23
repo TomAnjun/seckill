@@ -1,0 +1,53 @@
+#使用DELIMITER转换；为$$
+DELIMITER $$
+#创建存储过程
+CREATE PROCEDURE excute_seckill_pro(IN i_seckill_id BIGINT, IN i_user_phone BIGINT,
+                                    IN i_kill_time  TIMESTAMP, OUT o_result)
+  #存储过程具体逻辑
+  BEGIN
+    #声明变量
+    DECLARE v_insert_count INT;
+    #开启事务
+    START TRANSACTION;
+    INSERT IGNORE INTO success_killed (seckill_id, user_phone, create_time)
+    VALUES (i_sekcill_id, i_user_phone, i_kill_time);
+    #row_count()函数会返回上一条更新语句（inert，update，delete）的更新行数
+    SELECT ROW_COUNT()
+    INTO v_insert_count;
+    IF (v_insert_count = 0)
+    THEN
+      ROLLBACK;
+      SET o_result = -1;
+    ELSEIF (v_insert_count < 0)
+      THEN
+        ROLLBACK;
+        SET o_result = -2;
+    ELSE
+      #插入秒杀记录成功，更新库存信息
+      UPDATE seckill
+      SET number = number - 1
+      WHERE seckill_id = i_sekcill_id
+            AND i_kill_time < end_time
+            AND i_kill_time > start_time
+            AND number > 0;
+      SELECT ROW_COUNT()
+      INTO v_insert_count;
+      IF (v_insert_count = 0)
+      THEN
+        ROLLBACK;
+        SET o_result = 0;
+      ELSEIF (v_insert_count < 0)
+        THEN
+          ROLLBACK;
+          SET o_result = -2;
+      ELSE
+        COMMIT;
+        SET o_result = 1;
+      END IF;
+    END IF;
+  END
+#存储过程创建完毕
+$$
+#使用DELIMITER转换
+$$为;
+DELIMITER ;

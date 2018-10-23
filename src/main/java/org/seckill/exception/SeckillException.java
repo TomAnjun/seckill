@@ -1,0 +1,14 @@
+package org.seckill.exception;
+
+/**
+ * dao层秒杀异常
+ */
+public class SeckillException extends RuntimeException{
+    public SeckillException(String message) {
+        super(message);
+    }
+
+    public SeckillException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
